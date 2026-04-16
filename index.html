@@ -86,29 +86,16 @@ window.addEventListener('load', function(){
 
 function sendResult(code){
   document.getElementById('statusText').textContent = '✅ ' + code;
-  var sid = params.get('sid') || 'px_scan';
-
-  // วิธี 1: BroadcastChannel (ทำงานข้าม tab/window same-origin ไม่ได้ — แต่ลองไว้)
-  try{
-    var bc = new BroadcastChannel(sid);
-    bc.postMessage({ barcode: code });
-    setTimeout(function(){ bc.close(); }, 200);
-  } catch(e){}
-
-  // วิธี 2: localStorage fallback
-  try{
-    localStorage.setItem(sid, JSON.stringify({ barcode: code, ts: Date.now() }));
-  } catch(e){}
-
+  // ส่งหาทุก target ที่เป็นไปได้
+  try{ window.opener.postMessage({ barcode: code }, '*'); }catch(e){}
+  try{ window.opener.top.postMessage({ barcode: code }, '*'); }catch(e){}
   setTimeout(function(){ window.close(); }, 400);
 }
 
 function closeMe(){
   if(reader) try{ reader.reset(); }catch(e){}
-  var sid = params.get('sid') || 'px_scan';
-  try{
-    localStorage.setItem(sid, JSON.stringify({ barcode: null, ts: Date.now() }));
-  } catch(e){}
+  try{ window.opener.postMessage({ barcode: null }, '*'); }catch(e){}
+  try{ window.opener.top.postMessage({ barcode: null }, '*'); }catch(e){}
   window.close();
 }
 </script>
