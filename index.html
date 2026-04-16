@@ -67,14 +67,31 @@ window.addEventListener('load', function(){
     { video: { facingMode: 'environment' } },
     document.getElementById('video'),
     function(result, err){
+      var status = document.getElementById('statusText');
+    
       if(result && !done){
         done = true;
+    
         // flash
         var f = document.getElementById('flash');
         f.style.opacity = '.6';
         setTimeout(function(){ f.style.opacity = '0'; }, 150);
-        // ส่งกลับ
+    
         sendResult(result.getText());
+        return;
+      }
+    
+      // ── Feedback ขณะสแกน ──
+      if(err){
+        if(err instanceof ZXing.NotFoundException){
+          status.textContent = '🔍 กำลังค้นหา... จ่อบาร์โค้ดให้ตรงกรอบ';
+        }
+        else if(err instanceof ZXing.ChecksumException){
+          status.textContent = '⚠️ ใกล้อีกนิด / ถือให้นิ่ง';
+        }
+        else if(err instanceof ZXing.FormatException){
+          status.textContent = '📏 ขยับระยะ ห่าง/ใกล้อีกนิด';
+        }
       }
     }
   ).then(function(){
