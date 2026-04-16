@@ -74,7 +74,7 @@ html,body{height:100%;font-family:'Sarabun',sans-serif;background:#0a0a0a;color:
   position:absolute;
   top:50%;left:50%;
   transform:translate(-50%,-50%);
-  width:260px;height:130px;
+  width:300px;height:180px;
 }
 .scan-corner{
   position:absolute;
@@ -292,24 +292,34 @@ function startScanner(){
 
   var config = {
     fps: 30,
+
+    // 🔥 ขยายกรอบให้ใหญ่ + สูงขึ้น (อ่าน barcode ง่ายขึ้น)
     qrbox: function(w, h){
-      var s = Math.min(w, h) * 0.7;
-      return { width: Math.min(s, 260), height: Math.min(s * 0.5, 130) };
+      var width = Math.min(w * 0.9, 340);
+      return {
+        width: width,
+        height: width * 0.6
+      };
     },
-    aspectRatio: window.innerHeight / window.innerWidth,
+
+    // 🔥 fix ratio ให้กล้องนิ่งขึ้น
+    aspectRatio: 1.777,
+
+    // 🔥 ลด format = เร็วขึ้นเยอะ
     formatsToSupport: [
       Html5QrcodeSupportedFormats.EAN_13,
       Html5QrcodeSupportedFormats.EAN_8,
-      Html5QrcodeSupportedFormats.CODE_128,
-      Html5QrcodeSupportedFormats.CODE_39,
-      Html5QrcodeSupportedFormats.CODE_93,
-      Html5QrcodeSupportedFormats.QR_CODE,
-      Html5QrcodeSupportedFormats.DATA_MATRIX
-    ]
+      Html5QrcodeSupportedFormats.CODE_128
+    ],
+
+    // 🔥 ใช้ native detector ถ้ามี
+    experimentalFeatures: {
+      useBarCodeDetectorIfSupported: true
+    }
   };
 
   scanner.start(
-    { facingMode: 'environment' },
+    { facingMode: 'environment' }, // ✅ ต้องมีแค่นี้
     config,
     onScanSuccess,
     onScanFail
@@ -318,6 +328,11 @@ function startScanner(){
     document.getElementById('loadingWrap').style.display = 'none';
     document.getElementById('scanOverlay').style.display = 'block';
     setStatus('พร้อมสแกน', 'ok');
+
+    // 🔥 ปรับกรอบ overlay ให้ตรงกับ qrbox ใหม่
+    document.querySelector('.scan-frame').style.width = '300px';
+    document.querySelector('.scan-frame').style.height = '180px';
+
   })
   .catch(function(err){
     document.getElementById('loadingWrap').innerHTML =
